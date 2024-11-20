@@ -1,4 +1,5 @@
 const TransactionDetails = require('../models/transactionDetails');
+const mongoose = require('mongoose')
 
 module.exports = {
     getTransactions: async (req, res) => {
@@ -6,12 +7,21 @@ module.exports = {
             const { user_id } = req.query;
             const { id } = req.params;
 
+            if (id && !mongoose.Types.ObjectId.isValid(id)) {
+                return res.status(400).json({ message: "Invalid transaction ID" });
+            }
+
+            if (user_id && !mongoose.Types.ObjectId.isValid(user_id)) {
+                return res.status(400).json({ message: "Invalid user ID" });
+            }
+
             if (!id && !user_id) {
                 return res.status(400).json({ message: "Invalid request. Provide either a transaction ID or a user ID." });
             }
 
             if (id) {
                 const transaction = await TransactionDetails.findOne({ _id: id });
+                console.log(transaction)
                 if (!transaction) {
                     return res.status(404).json({ message: "Transaction not found" });
                 }
@@ -80,6 +90,10 @@ module.exports = {
         try {
             const { id } = req.params;
             const { status } = req.body;
+
+            if (id && !mongoose.Types.ObjectId.isValid(id)) {
+                return res.status(400).json({ message: "Invalid transaction ID" });
+            }
 
             if (!id) {
                 return res.status(400).json({ message: "Transaction ID is required." });
